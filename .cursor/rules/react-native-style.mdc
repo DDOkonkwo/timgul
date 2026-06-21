@@ -1,0 +1,61 @@
+---
+description: Combined master rules for React Native Expo application, responsive layouts, and strict visual separation for Mobile, Tablet, Desktop, and TV.
+globs: frontend/**/*.tsx, frontend/**/*.ts
+alwaysApply: true
+---
+
+# Global Frontend Architecture & Multi-Platform Style Guide
+
+We build a single cross-platform codebase that must look native, intentional, and stunning on Phones, Tablets, Desktop Web Browsers, and Android/Apple Televisions. While backend functions and API data remain identical, container layouts, sidebars, alignments, and button behaviors must be strictly isolated per form factor.
+
+---
+
+## 1. Core Engineering & Component Standards
+- **Component Patterns:** Always use functional components with explicitly typed TypeScript interfaces for Props. Avoid `any`.
+- **Styles Isolation:** Keep all styles isolated at the bottom of the file using `StyleSheet.create()`. Do not use messy inline styles in the JSX return block.
+- **Dependency Guard:** Always use native Expo SDK 54 core libraries rather than unverified third-party NPM packages where possible (e.g., use `expo-secure-store` for JWT saving).
+- **API Communication:** All network requests targeting our NestJS backend must be funneled through an explicit API service module. Ensure proper loading screens (`<ActivityIndicator />`) and user-facing error handling are present for every network invocation.
+
+---
+
+## 2. Universal Responsive Layout Framework
+- **No Hardcoded Dimensions:** NEVER use hardcoded pixel widths/heights for main containers (e.g., avoid `width: 400`). Use percentages (`width: '100%'`), Flexbox properties (`flex: 1`), or dynamic viewport measurements.
+- **Grid Mindset:** Always design with a grid mindset. Use `flexDirection: 'row'` with `flexWrap: 'wrap'` so that cards or components automatically stack vertically on phones but spread out horizontally on larger panels.
+- **Viewport Tracking:** Use `useWindowDimensions()` to listen to real-time screen sizes and dynamically switch layouts based on these exact breakpoints:
+  - Mobile Phone: `width < 768`
+  - Tablet: `width >= 768 && width < 1024`
+  - Desktop / Laptop: `width >= 1024 && width < 1440`
+  - Television (TV): `width >= 1440 && Platform.isTV`
+
+---
+
+## 3. Form-Factor Layout Blueprints & Visual Alignment
+
+### 📱 MOBILE (Screen Width < 768px)
+- **Layout Blueprint:** Single-column vertical stack. Full-bleed container widths (`100%`).
+- **Navigation Layout:** Bottom tab bars or collapsible hamburger overlays. 
+- **Button & Component Alignment:** Full-width primary action buttons fixed to the bottom viewport safe zone for easy thumb reach. Typography and text elements centered.
+
+### 📑 TABLET (Screen Width >= 768px && < 1024px)
+- **Layout Blueprint:** Multi-column asymmetric grids. Content split gracefully into cards or balanced dashboard panels.
+- **Navigation Layout:** Floating top navigation bar or a left icon-only dock.
+- **Button & Component Alignment:** Secondary buttons grouped horizontally. Interactive actions aligned to the right edge of cards.
+
+### 💻 COMPUTER / DESKTOP (Screen Width >= 1024px && < 1440px)
+- **Layout Blueprint:** **Sidebar + Center Screen Canvas**. 
+  - Persistent left navigation pane with a fixed width (240px - 280px).
+  - Main display container strictly restricted to a centered max-width sheet (`maxWidth: 1200px`, `alignSelf: 'center'`) so layouts do not stretch awkwardly on ultra-wide screens.
+- **Button & Component Alignment:** Text, input fields, and buttons aligned to the left of their specific content sections. Mouse hover states (`cursor: 'pointer'`) are mandatory.
+
+### 📺 TELEVISION (Screen Width >= 1440px && Platform.isTV)
+- **Layout Blueprint:** **Horizontal Widescreen Cinema Grid**.
+  - Wide, persistent Left Sidebar optimized for rapid D-Pad selection.
+  - Right-side content canvas scaling dynamically and horizontally across the screen display.
+  - Mandatory 5% minimum safe-area margins on all sides to account for hardware TV overscan (outer edge clipping).
+- **Button & Component Alignment:** Centralized grid focusing, absolute symmetry, oversized interactive nodes.
+- **TV D-Pad Interaction:** TVs do not have touchscreens or mice. Every button or interactive component must explicitly handle focus styling (`onFocus` / `onBlur`). Buttons must clearly highlight, scale up, or change border colors when focused so the remote control user knows exactly what is selected.
+
+---
+
+## 4. Coding Standard: Conditional Layout Rendering
+Do not use messy inline ternary expressions to stretch and deform elements across platforms. Use explicit structural split rendering or targeted conditional style sheet overrides so Cursor completely separates the visual layouts and structures.

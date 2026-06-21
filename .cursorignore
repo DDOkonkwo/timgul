@@ -37,7 +37,6 @@ assets/
 .git/
 .vscode/
 .claude/
-.cursor/
 
 # Secrets & local env
 .env
